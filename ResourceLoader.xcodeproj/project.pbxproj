@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		87FA6C871CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 87FA6C861CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.m */; };
+		87FA6C911CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 87FA6C901CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.m */; };
 		EF0F0A1C1A7CCADE002F5966 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EF0F0A1B1A7CCADE002F5966 /* main.m */; };
 		EF0F0A1F1A7CCADE002F5966 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EF0F0A1E1A7CCADE002F5966 /* AppDelegate.m */; };
 		EF0F0A411A7CCBB2002F5966 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EF0F0A401A7CCBB2002F5966 /* RootViewController.m */; };
@@ -67,6 +69,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		87FA6C851CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSPlayerResourceLoaderDelegate.h; sourceTree = "<group>"; };
+		87FA6C861CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSPlayerResourceLoaderDelegate.m; sourceTree = "<group>"; };
+		87FA6C8F1CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "YDSession+LSFilePlayerResourceLoaderDataSource.h"; sourceTree = "<group>"; };
+		87FA6C901CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "YDSession+LSFilePlayerResourceLoaderDataSource.m"; sourceTree = "<group>"; };
 		EF0F0A161A7CCADE002F5966 /* ResourceLoader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ResourceLoader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF0F0A1A1A7CCADE002F5966 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EF0F0A1B1A7CCADE002F5966 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -186,6 +192,8 @@
 		EF0F0A661A7CD38D002F5966 /* Player */ = {
 			isa = PBXGroup;
 			children = (
+				87FA6C8F1CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.h */,
+				87FA6C901CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.m */,
 				EF0F0A631A7CD382002F5966 /* LSPlayer.h */,
 				EF0F0A641A7CD382002F5966 /* LSPlayer.m */,
 				EF0F0AAF1A7CFEBD002F5966 /* LSFilePlayerResourceLoader.h */,
@@ -194,6 +202,8 @@
 				EF0F0AAE1A7CFEBD002F5966 /* LSContentInformation.m */,
 				EF3A53DB1A7E59550036344C /* LSDataResonse.h */,
 				EF3A53DC1A7E59550036344C /* LSDataResonse.m */,
+				87FA6C851CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.h */,
+				87FA6C861CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.m */,
 			);
 			name = Player;
 			sourceTree = "<group>";
@@ -378,6 +388,7 @@
 				EF0F0AA01A7CF67F002F5966 /* LSPlaySliderView.m in Sources */,
 				EF3A53DD1A7E59550036344C /* LSDataResonse.m in Sources */,
 				EF3A53EF1A7E5BDD0036344C /* NSString+LSFormatAdditions.m in Sources */,
+				87FA6C871CAC2C3600BEEBDB /* LSPlayerResourceLoaderDelegate.m in Sources */,
 				EF0F0AB21A7CFEBD002F5966 /* LSFilePlayerResourceLoader.m in Sources */,
 				EF0F0A1F1A7CCADE002F5966 /* AppDelegate.m in Sources */,
 				EF0F0AB11A7CFEBD002F5966 /* LSContentInformation.m in Sources */,
@@ -386,6 +397,7 @@
 				EF0F0AA61A7CF6CC002F5966 /* UIImage+LSAdditions.m in Sources */,
 				EF3A53F11A7E5BDD0036344C /* NSString+LSPathAdditions.m in Sources */,
 				EF0F0A411A7CCBB2002F5966 /* RootViewController.m in Sources */,
+				87FA6C911CAD29DA00BEEBDB /* YDSession+LSFilePlayerResourceLoaderDataSource.m in Sources */,
 				EF0F0A651A7CD382002F5966 /* LSPlayer.m in Sources */,
 				EF0F0A471A7CCBE6002F5966 /* FilesListViewController.m in Sources */,
 			);

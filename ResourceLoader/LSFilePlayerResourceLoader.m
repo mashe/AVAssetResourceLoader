@@ -13,7 +13,6 @@
 #import "NSObject+LSAdditions.h"
 #import "NSString+LSAdditions.h"
 #import "LSContentInformation.h"
-#import "YDSession.h"
 
 
 
@@ -22,9 +21,9 @@ NSString * const LSFilePlayerResourceLoaderErrorDomain = @"LSFilePlayerResourceL
 @interface LSFilePlayerResourceLoader()
 
 @property (nonatomic,strong)NSMutableArray *pendingRequests;
-@property (nonatomic,strong)id<YDSessionRequest> contentInfoOperation;
-@property (nonatomic,strong)id<YDSessionRequest> dataOperation;
-@property (nonatomic,strong)YDSession *session;
+@property (nonatomic,strong)id<LSResourceLoaderRequest> contentInfoOperation;
+@property (nonatomic,strong)id<LSResourceLoaderRequest> dataOperation;
+@property (nonatomic,weak)id<LSFilePlayerResourceLoaderDataSource> dataSource;
 @property (nonatomic,strong)NSURL *resourceURL;
 @property (nonatomic,assign)BOOL isCancelled;
 @property (nonatomic,copy)NSString *path;
@@ -40,12 +39,12 @@ NSString * const LSFilePlayerResourceLoaderErrorDomain = @"LSFilePlayerResourceL
 @implementation LSFilePlayerResourceLoader
 
 
-- (instancetype)initWithResourceURL:(NSURL *)url session:(YDSession *)session{
+- (instancetype)initWithResourceURL:(NSURL *)url dataSourse:(id<LSFilePlayerResourceLoaderDataSource>)dataSource {
     self = [super init];
     if(self){
         self.resourceURL = url;
         self.path = url.path;
-        self.session = session;
+        self.dataSource = dataSource;
         self.isCancelled = NO;
         self.pendingRequests = [[NSMutableArray alloc] init];
         self.receivedDataLength = 0;
@@ -135,72 +134,71 @@ NSString * const LSFilePlayerResourceLoaderErrorDomain = @"LSFilePlayerResourceL
     
     void(^loadDataBlock)(unsigned long long off, unsigned long long len) = ^(unsigned long long offset,unsigned long long length){
         
-        [weakSelf performBlockOnMainThreadSync:^{
-
-            NSString *bytesString = [NSString stringWithFormat:@"bytes=%lld-%lld",offset,(offset+length-1)];
-            NSDictionary *params = @{@"Range":bytesString};
-            
-            id<YDSessionRequest> req = [weakSelf.session partialContentForFileAtPath:weakSelf.path withParams:params response:nil data:^(UInt64 recDataLength, UInt64 totDataLength, NSData *recData) {
-                [weakSelf performBlockOnMainThreadSync:^{
-                    if(weakSelf && weakSelf.isCancelled==NO){
-                        LSDataResonse *dataResponse = [LSDataResonse responseWithRequestedOffset:offset requestedLength:length receivedDataLength:recDataLength data:recData];
-                        [weakSelf didReceiveDataResponse:dataResponse];
-                    }
-                }];
-                
-            } completion:^(NSError *err) {
-                if(err){
-                    failureBlock(err);
-                }
-            }];
-
-            weakSelf.dataOperation = req;
-        }];
+		[weakSelf performBlockOnMainThreadSync:^{
+			
+			NSString *bytesString = [NSString stringWithFormat:@"bytes=%lld-%lld",offset,(offset+length-1)];
+			NSDictionary *params = @{@"Range":bytesString};
+			
+			id<LSResourceLoaderRequest> req = [weakSelf.dataSource partialContentForFileAtPath:weakSelf.path withParams:params data:^(UInt64 recDataLength, UInt64 totDataLength, NSData *recData) {
+				[weakSelf performBlockOnMainThreadSync:^{
+					if(weakSelf && weakSelf.isCancelled==NO){
+						LSDataResonse *dataResponse = [LSDataResonse responseWithRequestedOffset:offset requestedLength:length receivedDataLength:recDataLength data:recData];
+						[weakSelf didReceiveDataResponse:dataResponse];
+					}
+				}];
+				
+				
+			} completion:^(NSError *err) {
+				if(err){
+					failureBlock(err);
+				}
+			}];
+			
+			weakSelf.dataOperation = req;
+		}];
     };
-    
+	
     if(self.contentInformation==nil){
-        
-        self.contentInfoOperation = [self.session fetchStatusForPath:self.path completion:^(NSError *err, YDItemStat *item) {
-            
-            if(weakSelf && weakSelf.isCancelled==NO){
-                if(err==nil){
-                    
-                    NSString *mimeType = item.path.mimeTypeForPathExtension;
-                    CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)(mimeType), NULL);
-                    unsigned long long contentLength = item.size;
-                    
-                    weakSelf.contentInformation = [[LSContentInformation alloc] init];
-                    weakSelf.contentInformation.byteRangeAccessSupported = YES;
-                    weakSelf.contentInformation.contentType = CFBridgingRelease(contentType);
-                    weakSelf.contentInformation.contentLength = contentLength;
-                    
-                    [weakSelf prepareDataCache];
-                    
-                    loadDataBlock(requestedOffset,requestedLength);
-                    
-                    weakSelf.contentInfoOperation = nil;
-                    
-                }
-                else{
-                    failureBlock(err);
-                }
-            }
-            
-        }];
-
-    }
+		
+		self.contentInfoOperation = [self.dataSource getStatusForPath:self.path completion:^(NSError *err, NSString *mimeType, unsigned long long size) {
+			
+			if(weakSelf && weakSelf.isCancelled==NO){
+				if(err==nil){
+					
+					CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)(mimeType), NULL);
+					
+					weakSelf.contentInformation = [[LSContentInformation alloc] init];
+					weakSelf.contentInformation.byteRangeAccessSupported = YES;
+					weakSelf.contentInformation.contentType = CFBridgingRelease(contentType);
+					weakSelf.contentInformation.contentLength = size;
+					
+					[weakSelf prepareDataCache];
+					
+					loadDataBlock(requestedOffset,requestedLength);
+					
+					weakSelf.contentInfoOperation = nil;
+					
+				}
+				else{
+					failureBlock(err);
+				}
+			}
+			
+		}];
+		
+	}
     else{
         loadDataBlock(requestedOffset,requestedLength);
     }
-    
+	
 }
 
 #pragma mark - Data Load Callback`s
 
 - (void)didReceiveDataResponse:(LSDataResonse *)dataResponse{
-    
+	
     [self cacheDataResponse:dataResponse];
-   
+	
     self.receivedDataLength=dataResponse.currentOffset;
     
     [self processPendingRequests];

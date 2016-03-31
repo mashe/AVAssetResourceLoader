@@ -9,8 +9,8 @@
 
 #import <AVFoundation/AVFoundation.h>
 
-@class YDSession;
 @protocol LSFilePlayerResourceLoaderDelegate;
+@protocol LSFilePlayerResourceLoaderDataSource;
 
 
 @interface LSFilePlayerResourceLoader : NSObject
@@ -19,14 +19,14 @@
 
 @property (nonatomic,readonly)NSArray *requests;
 
-@property (nonatomic,readonly,strong)YDSession *session;
+@property (nonatomic,weak, readonly)id<LSFilePlayerResourceLoaderDataSource> dataSource;
 
 @property (nonatomic,readonly,assign)BOOL isCancelled;
 
 @property (nonatomic,weak)id<LSFilePlayerResourceLoaderDelegate> delegate;
 
 
-- (instancetype)initWithResourceURL:(NSURL *)url session:(YDSession *)session;
+- (instancetype)initWithResourceURL:(NSURL *)url dataSourse:(id<LSFilePlayerResourceLoaderDataSource>)dataSource;
 
 - (void)addRequest:(AVAssetResourceLoadingRequest *)loadingRequest;
 
@@ -37,6 +37,11 @@
 @end
 
 
+@protocol LSResourceLoaderRequest <NSObject>
+
+- (void)cancel;
+
+@end
 
 @protocol LSFilePlayerResourceLoaderDelegate <NSObject>
 
@@ -45,5 +50,19 @@
 - (void)filePlayerResourceLoader:(LSFilePlayerResourceLoader *)resourceLoader didFailWithError:(NSError *)error;
 
 - (void)filePlayerResourceLoader:(LSFilePlayerResourceLoader *)resourceLoader didLoadResource:(NSURL *)resourceURL;
+
+@end
+
+@protocol LSFilePlayerResourceLoaderDataSource <NSObject>
+
+@required
+
+- (id<LSResourceLoaderRequest>)partialContentForFileAtPath:(NSString *)srcRemotePath
+																							withParams:(NSDictionary *)params
+																										data:(void (^)(UInt64 receivedDataLength, UInt64 totalDataLength, NSData *data))data
+																							completion:(void (^)(NSError *err))completion;
+
+- (id<LSResourceLoaderRequest>)getStatusForPath:(NSString *)path completion:(void (^)(NSError *err, NSString*mimeType, unsigned long long size))block;
+
 
 @end

@@ -12,6 +12,8 @@
 #import "YDSession.h"
 #import "NSObject+LSAdditions.h"
 #import "LSFilePlayerResourceLoader.h"
+#import "LSPlayerResourceLoaderDelegate.h"
+#import "YDSession+LSFilePlayerResourceLoaderDataSource.h"
 
 
 NSString * const kStatusKey                     = @"status";
@@ -22,17 +24,12 @@ NSString * const kLoadedTimeRanges              = @"loadedTimeRanges";
 NSString * const LSPlayerErrorDomain            = @"LSPlayerErrorDomain";
 
 
-NSString * const LSFileScheme = @"customscheme";
+@interface LSPlayer()<LSFilePlayerResourceLoaderDelegate>
 
-
-@interface LSPlayer()<LSFilePlayerResourceLoaderDelegate,AVAssetResourceLoaderDelegate>
-
-@property (nonatomic,strong)YDSession *session;
 @property (nonatomic,strong)NSURL *fileURL;
 
 @property (nonatomic,strong)AVPlayer *player;
-
-@property (nonatomic,strong)NSMutableDictionary *resourceLoaders;
+@property (nonatomic,strong)LSPlayerResourceLoaderDelegate *resourceLoaderDelegate;
 
 @property (nonatomic,strong)id scrubberTimeObserver;
 @property (nonatomic,strong)id clockTimeObserver;
@@ -51,7 +48,6 @@ NSString * const LSFileScheme = @"customscheme";
     self = [super init];
     if(self){
         self.timeObservingPrecision = 0.0;
-        self.resourceLoaders = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -118,7 +114,6 @@ NSString * const LSFileScheme = @"customscheme";
 
 - (void)cancelAllAndClearPlayer{
     [self clearPlayer];
-    [self cancelAllResourceLoaders];
 }
 
 - (void)fetchAndPlayFileAtURL:(NSURL *)fileURL session:(YDSession *)session{
@@ -126,12 +121,14 @@ NSString * const LSFileScheme = @"customscheme";
     [self performBlockOnMainThreadSync:^{
 
         self.fileURL = fileURL;
-        self.session = session;
         
         [self cancelAllAndClearPlayer];
         
         AVURLAsset *asset = [AVURLAsset URLAssetWithURL:fileURL options:nil];
-        [asset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
+		
+		self.resourceLoaderDelegate = [[LSPlayerResourceLoaderDelegate alloc] initWithDataSource:session];
+		
+        [asset.resourceLoader setDelegate:self.resourceLoaderDelegate queue:dispatch_get_main_queue()];
        
         AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset];
         [self addObserversForPlayerItem:item];
@@ -156,7 +153,7 @@ NSString * const LSFileScheme = @"customscheme";
 
 - (void)playerDidReachEnd{
     self.fileURL = nil;
-    self.session = nil;
+
     [self stop];
     [self notifyDidReachEnd];
 }
@@ -546,73 +543,5 @@ NSString * const LSFileScheme = @"customscheme";
     return NO;
 }
 
-
-#pragma mark - AVAssetResourceLoaderDelegate
-
-- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
-    NSURL *resourceURL = [loadingRequest.request URL];
-    if([resourceURL.scheme isEqualToString:LSFileScheme]){
-        LSFilePlayerResourceLoader *loader = [self resourceLoaderForRequest:loadingRequest];
-        if(loader==nil){
-            loader = [[LSFilePlayerResourceLoader alloc] initWithResourceURL:resourceURL session:self.session];
-            loader.delegate = self;
-            [self.resourceLoaders setObject:loader forKey:[self keyForResourceLoaderWithURL:resourceURL]];
-        }
-        [loader addRequest:loadingRequest];
-        return YES;
-    }
-    return NO;
-}
-
-- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
-    LSFilePlayerResourceLoader *loader = [self resourceLoaderForRequest:loadingRequest];
-    [loader removeRequest:loadingRequest];
-}
-
-#pragma mark - LSFilePlayerResourceLoader
-
-- (void)removeResourceLoader:(LSFilePlayerResourceLoader *)resourceLoader{
-    id <NSCopying> requestKey = [self keyForResourceLoaderWithURL:resourceLoader.resourceURL];
-    if(requestKey){
-        [self.resourceLoaders removeObjectForKey:requestKey];
-    }
-}
-
-- (void)cancelAndRemoveResourceLoaderForURL:(NSURL *)resourceURL{
-    id <NSCopying> requestKey = [self keyForResourceLoaderWithURL:resourceURL];
-    LSFilePlayerResourceLoader *loader = [self.resourceLoaders objectForKey:requestKey];
-    [self removeResourceLoader:loader];
-    [loader cancel];
-}
-
-- (void)cancelAllResourceLoaders{
-    NSArray *items = [self.resourceLoaders allValues];
-    [self.resourceLoaders removeAllObjects];
-    for(LSFilePlayerResourceLoader *loader in items){
-        [loader cancel];
-    }
-}
-
-- (id<NSCopying>)keyForResourceLoaderWithURL:(NSURL *)requestURL{
-    if([requestURL.scheme isEqualToString:LSFileScheme]){
-        NSString *s = requestURL.absoluteString;
-        return s;
-    }
-    return nil;
-}
-
-- (LSFilePlayerResourceLoader *)resourceLoaderForRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
-    NSURL *interceptedURL = [loadingRequest.request URL];
-    if([interceptedURL.scheme isEqualToString:LSFileScheme]){
-        id <NSCopying> requestKey = [self keyForResourceLoaderWithURL:[loadingRequest.request URL]];
-        LSFilePlayerResourceLoader *loader = [self.resourceLoaders objectForKey:requestKey];
-        return loader;
-    }
-    return nil;
-}
-
-- (void)filePlayerResourceLoader:(LSFilePlayerResourceLoader *)resourceLoader didFailWithError:(NSError *)error{
-    [self cancelAndRemoveResourceLoaderForURL:resourceLoader.resourceURL];
-}
 
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "LSPlayerResourceLoaderDelegate.h"
 
 typedef enum {
     LSPlayerStatusUnknown = -1,
@@ -29,7 +30,6 @@ typedef NS_ENUM(NSUInteger, LSPlayerFailedStatus) {
 };
 
 extern NSString * const LSPlayerErrorDomain;
-extern NSString * const LSFileScheme;
 
 @protocol LSPlayerDelegate;
 @class YDSession;
