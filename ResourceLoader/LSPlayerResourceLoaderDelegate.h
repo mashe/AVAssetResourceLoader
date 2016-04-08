@@ -6,7 +6,6 @@
 //  Copyright © 2016 LeshkoApps. All rights reserved.
 //
 
-#import "YDSession.h"
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 

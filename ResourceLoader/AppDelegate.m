@@ -8,10 +8,11 @@
 
 
 #import "AppDelegate.h"
-#import "RootViewController.h"
-
-
-
+#ifdef YDEXAMPLE
+	#import "RootViewController.h"
+#else
+	#import "ViewController.h"
+#endif
 
 
 @interface AppDelegate ()
@@ -22,8 +23,11 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-    self.rootViewController = [[RootViewController alloc] init];
+#ifdef YDEXAMPLE
+	self.rootViewController = [[RootViewController alloc] init];
+#else
+	self.rootViewController = [[ViewController alloc] init];
+#endif
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = self.rootViewController;
