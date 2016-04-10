@@ -26,7 +26,7 @@ LSPlayerResourceLoaderDelegate.m
 4. use `LSPlayerResourceLoaderDelegate` instance as `asset.resourceLoader delegate`
 
 Here is the code:
-```
+```obj-c
 	// 2. create LSPlayerResourceLoaderDelegate instance using instance that confirms LSFilePlayerResourceLoaderDataSource protocol
 	self.resourceLoaderDelegate = [[LSPlayerResourceLoaderDelegate alloc] initWithDataSource:[HTTPManager sharedManager]];
 	
