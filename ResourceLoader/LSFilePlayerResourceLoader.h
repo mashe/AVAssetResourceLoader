@@ -58,9 +58,9 @@
 @required
 
 - (id<LSResourceLoaderRequest>)partialContentForFileAtPath:(NSString *)srcRemotePath
-																							withParams:(NSDictionary *)params
-																										data:(void (^)(UInt64 receivedDataLength, UInt64 totalDataLength, NSData *data))data
-																							completion:(void (^)(NSError *err))completion;
+												withParams:(NSDictionary *)params
+													  data:(void (^)(UInt64 receivedDataLength, UInt64 totalDataLength, NSData *data))data
+												completion:(void (^)(NSError *err))completion;
 
 - (id<LSResourceLoaderRequest>)getStatusForPath:(NSString *)path completion:(void (^)(NSError *err, NSString*mimeType, unsigned long long size))block;
 

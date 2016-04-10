@@ -86,6 +86,8 @@ NSString * const BaseHost = @"sample-videos.com";
 	self.receivedDataBlocks = nil;
 }
 
+#pragma mark - LSFilePlayerResourceLoader
+
 - (id<LSResourceLoaderRequest>)partialContentForFileAtPath:(NSString *)srcRemotePath
 												withParams:(NSDictionary *)params
 													  data:(void (^)(UInt64 receivedDataLength, UInt64 totalDataLength, NSData *data))data
