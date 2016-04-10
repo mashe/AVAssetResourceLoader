@@ -9,7 +9,8 @@ There are two sample applications:
 
 # Tutorial
 
-0. Import next files to you project:
+0. Import next files to your project:
+```
 LSContentInformation.h
 LSContentInformation.m
 LSDataResonse.h
@@ -18,22 +19,23 @@ LSFilePlayerResourceLoader.h
 LSFilePlayerResourceLoader.m
 LSPlayerResourceLoaderDelegate.h
 LSPlayerResourceLoaderDelegate.m
+```
 1. Implement an datasource that confirms `LSFilePlayerResourceLoaderDataSource` protocol. (`HTTPManager` and `YDSession+LSFilePlayerResourceLoaderDataSource` in samples)
-2. create `LSPlayerResourceLoaderDelegate` instance using instance datasource
+2. create `LSPlayerResourceLoaderDelegate` instance using the datasource
 3. use `LSFileScheme` while creating fileURL
 4. use `LSPlayerResourceLoaderDelegate` instance as `asset.resourceLoader delegate`
 
-here is the code:
+Here is the code:
 ```
-	// create LSPlayerResourceLoaderDelegate instance using instance that confirms LSFilePlayerResourceLoaderDataSource protocol
+	// 2. create LSPlayerResourceLoaderDelegate instance using instance that confirms LSFilePlayerResourceLoaderDataSource protocol
 	self.resourceLoaderDelegate = [[LSPlayerResourceLoaderDelegate alloc] initWithDataSource:[HTTPManager sharedManager]];
 	
-	// use LSFileScheme while creating fileURL
+	// 3. use LSFileScheme while creating fileURL
 	NSURL *fileURL = [[NSURL alloc] initWithScheme:LSFileScheme host:BaseHost path:@"/video/mp4/720/big_buck_bunny_720p_50mb.mp4"];
 	
 	AVURLAsset *asset = [AVURLAsset URLAssetWithURL:fileURL options:nil];
 	
-	// use LSPlayerResourceLoaderDelegate instance as asset.resourceLoader delegate
+	// 4. use LSPlayerResourceLoaderDelegate instance as asset.resourceLoader delegate
 	[asset.resourceLoader setDelegate:self.resourceLoaderDelegate queue:dispatch_get_main_queue()];
 	
 	AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset];
