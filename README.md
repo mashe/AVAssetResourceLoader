@@ -1,28 +1,55 @@
 # AVAssetResourceLoader
- A sample iOS application that demonstrates AVAssetResourceLoader for AVPlayer.
- 
- It uses [Yandex.Disk](https://disk.yandex.com) cloud service for streaming and caching audio files.
- 
-# Apps using this in real life
+This is a fork from AVAssetResourceLoader.
+Why? Big thanks to [LeshkoApps](http://leshkoapps.com), they have made a great job and provided mechanism to cache playable content of AVPlayer. But it was limited to [Yandex.Disk](https://disk.yandex.com) cloud service only. So I decided to make it more universal to use with any service/http client.
 
-[**Evermusic**](https://itunes.apple.com/us/app/evermusic/id885367198?ls=1&mt=8)
+There are two sample applications:
 
-[**Evermusic Pro**](https://itunes.apple.com/us/app/evermusic-pro/id905746421?ls=1&mt=8)
+ 1. It uses [Yandex.Disk](https://disk.yandex.com) cloud service for streaming and caching audio files.
+ 2. It uses [AFNetworking](https://github.com/AFNetworking/AFNetworking) framework and video from http://www.sample-videos.com .
 
 # Tutorial
 
-The full tutorial about how audio streaming was implemented in this sample project is available here:
+0. Import next files to you project:
+LSContentInformation.h
+LSContentInformation.m
+LSDataResonse.h
+LSDataResonse.m
+LSFilePlayerResourceLoader.h
+LSFilePlayerResourceLoader.m
+LSPlayerResourceLoaderDelegate.h
+LSPlayerResourceLoaderDelegate.m
+1. Implement an datasource that confirms `LSFilePlayerResourceLoaderDataSource` protocol. (`HTTPManager` and `YDSession+LSFilePlayerResourceLoaderDataSource` in samples)
+2. create `LSPlayerResourceLoaderDelegate` instance using instance datasource
+3. use `LSFileScheme` while creating fileURL
+4. use `LSPlayerResourceLoaderDelegate` instance as `asset.resourceLoader delegate`
+
+here is the code:
+```
+	// create LSPlayerResourceLoaderDelegate instance using instance that confirms LSFilePlayerResourceLoaderDataSource protocol
+	self.resourceLoaderDelegate = [[LSPlayerResourceLoaderDelegate alloc] initWithDataSource:[HTTPManager sharedManager]];
+	
+	// use LSFileScheme while creating fileURL
+	NSURL *fileURL = [[NSURL alloc] initWithScheme:LSFileScheme host:BaseHost path:@"/video/mp4/720/big_buck_bunny_720p_50mb.mp4"];
+	
+	AVURLAsset *asset = [AVURLAsset URLAssetWithURL:fileURL options:nil];
+	
+	// use LSPlayerResourceLoaderDelegate instance as asset.resourceLoader delegate
+	[asset.resourceLoader setDelegate:self.resourceLoaderDelegate queue:dispatch_get_main_queue()];
+	
+	AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset];
+	
+	self.player = [[AVPlayer alloc] initWithPlayerItem:item];
+	[self.player play];
+```
+
+The full tutorial about how audio streaming was implemented in the sample project I forked from is available here:
 http://leshkoapps.com/wordpress/audio-streaming-and-caching-in-ios-using-avassetresourceloader-and-avplayer/
 
 # Contacts
  
  For additional information please contact: 
  
-
- public.leshko@gmail.com
- 
- 
- http://leshkoapps.com/wordpress/support/
+ shire8bit@gmail.com
  
 # License
 
